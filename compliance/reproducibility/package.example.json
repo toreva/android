@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0.0",
+  "constitution": {
+    "id": "CON-BUILD-001",
+    "acknowledged": true,
+    "source_url": "https://github.com/goblin-agent/coordinator/blob/main/docs/acp/BUILD_CONSTITUTION.md"
+  },
+  "repo": {
+    "name": "android_shadow",
+    "platform": "android",
+    "thin_client": true,
+    "gateway_only": true,
+    "delayed_public_mirror": true
+  },
+  "commit": {
+    "sha": "0000000",
+    "ref": "refs/heads/main"
+  },
+  "build": {
+    "toolchain": {
+      "java": "17",
+      "gradle": "8.x"
+    },
+    "commands": [
+      "gradle lintDebug",
+      "gradle :app:compileDebugKotlin",
+      "gradle testDebugUnitTest",
+      "gradle assembleDebug"
+    ],
+    "ci_gates": [
+      "reproducibility/package",
+      "ci/boundary",
+      "ci/lint",
+      "ci/typecheck",
+      "ci/unit",
+      "ci/build",
+      "security/secrets"
+    ]
+  },
+  "artifacts": {
+    "apk_debug": "app/build/outputs/apk/debug/app-debug.apk",
+    "apk_release_unsigned": "app/build/outputs/apk/release/app-release-unsigned.apk"
+  },
+  "evidence": {
+    "sbom": "sbom.spdx.json",
+    "provenance": "github-attestation:release/evidence",
+    "signature_references": "compliance/release/signature-references.md"
+  }
+}

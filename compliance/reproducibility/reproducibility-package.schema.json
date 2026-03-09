@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://toreva.dev/schemas/reproducibility-package.schema.json",
+  "title": "Reproducibility Package",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "constitution",
+    "repo",
+    "commit",
+    "build",
+    "artifacts",
+    "evidence"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "constitution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "acknowledged"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "const": "CON-BUILD-001"
+        },
+        "acknowledged": {
+          "type": "boolean",
+          "const": true
+        },
+        "source_url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "repo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "platform",
+        "thin_client",
+        "gateway_only",
+        "delayed_public_mirror"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "platform": {
+          "type": "string",
+          "enum": [
+            "android",
+            "ios",
+            "web"
+          ]
+        },
+        "thin_client": {
+          "type": "boolean",
+          "const": true
+        },
+        "gateway_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "delayed_public_mirror": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+    "commit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sha",
+        "ref"
+      ],
+      "properties": {
+        "sha": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{7,40}$"
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "toolchain",
+        "commands",
+        "ci_gates"
+      ],
+      "properties": {
+        "toolchain": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "java",
+            "gradle"
+          ],
+          "properties": {
+            "java": {
+              "type": "string",
+              "minLength": 1
+            },
+            "gradle": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "commands": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "ci_gates": {
+          "type": "array",
+          "minItems": 7,
+          "items": {
+            "type": "string",
+            "enum": [
+              "reproducibility/package",
+              "ci/boundary",
+              "ci/lint",
+              "ci/typecheck",
+              "ci/unit",
+              "ci/build",
+              "security/secrets"
+            ]
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "apk_debug"
+      ],
+      "properties": {
+        "apk_debug": {
+          "type": "string",
+          "minLength": 1
+        },
+        "apk_release_unsigned": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sbom",
+        "provenance",
+        "signature_references"
+      ],
+      "properties": {
+        "sbom": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provenance": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signature_references": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}
