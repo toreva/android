@@ -6,16 +6,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import com.toreva.mobile.ui.theme.Day1Colors
+import com.toreva.mobile.ui.theme.Day1Radius
+import com.toreva.mobile.ui.theme.Day1Spacing
+import com.toreva.mobile.ui.theme.Day1Type
 
 @Composable
 fun StatusBadge(text: String, live: Boolean) {
     Text(
         text = text,
+        style = Day1Type.caption2,
+        color = Day1Colors.TextPrimary,
         modifier = Modifier
-            .background(if (live) Color(0xFF2E7D32) else Color(0xFF616161), RoundedCornerShape(999.dp))
-            .padding(horizontal = 10.dp, vertical = 4.dp),
-        color = Color.White,
+            .background(
+                if (live) Day1Colors.PrimaryTeal else Day1Colors.NeutralGrey,
+                RoundedCornerShape(Day1Radius.pill),
+            )
+            .padding(horizontal = Day1Spacing.sm, vertical = Day1Spacing.xxs),
     )
 }
