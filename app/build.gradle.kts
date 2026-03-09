@@ -1,13 +1,14 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     kotlin("kapt")
 }
 
 android {
     namespace = "com.toreva.mobile"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.toreva.mobile"
@@ -17,7 +18,7 @@ android {
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "TOREVA_API_URL", "\"${project.findProperty("TOREVA_API_URL") ?: "https://gateway.toreva.com"}\"")
+        buildConfigField("String", "TOREVA_API_URL", "\"${project.findProperty("TOREVA_API_URL") ?: "http://10.0.2.2:8080/"}\"")
         buildConfigField("String", "SOLANA_CLUSTER", "\"${project.findProperty("TOREVA_SOLANA_CLUSTER") ?: "devnet"}\"")
         buildConfigField("String", "EXPLORER_URL", "\"${project.findProperty("TOREVA_EXPLORER_URL") ?: "https://solscan.io"}\"")
         buildConfigField("String", "RPC_URL", "\"${project.findProperty("TOREVA_RPC_URL") ?: "https://api.devnet.solana.com"}\"")
@@ -37,8 +38,12 @@ android {
         compose = true
         buildConfig = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
     }
 }
 
@@ -46,6 +51,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation("com.google.android.material:material:1.12.0")
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.tooling.preview)

@@ -39,6 +39,12 @@ This repo MUST NOT:
   validation evidence is produced (reproducibility package, boundary checks,
   security gates, SBOM/provenance/signature references)
 
+## Design Policy
+- Read `docs/DESIGN_CONSTITUTION.md` before any UI/UX changes.
+- Enforce `docs/ANDROID_DESIGN_ENFORCEMENT.md` for Android visual behavior.
+- If design policy conflicts exist, `docs/DESIGN_CONSTITUTION.md` takes
+  precedence.
+
 ## Build
 gradle assembleDebug
 

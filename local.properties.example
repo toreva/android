@@ -1,0 +1,6 @@
+# Copy to local.properties and adjust for your machine.
+# sdk.dir=/Users/<your-user>/Library/Android/sdk
+TOREVA_API_URL=https://gateway.toreva.com/
+TOREVA_SOLANA_CLUSTER=devnet
+TOREVA_EXPLORER_URL=https://solscan.io
+TOREVA_RPC_URL=https://api.devnet.solana.com
