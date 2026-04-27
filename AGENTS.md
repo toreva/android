@@ -50,3 +50,13 @@ gradle assembleDebug
 
 ## Test
 gradle test
+
+<!-- TOREVA-FALLBACK-DISPATCH START -->
+## Dispatch Inbox
+
+At the start of every session, check `intake/pending-dispatches/` for repo-local work packets.
+Primary transport is still the coordinator message bus.
+Use this folder only as the pre-bus or degraded-mode fallback when a repo is not yet fully bus-onboarded, or when bus/GitHub relay delivery is unavailable.
+Update the dispatch file status in place when you acknowledge, progress, complete, reject, supersede, or expire the work.
+Cross-repo queue visibility is aggregated in `coordinator/reports/dispatch/fallback-dispatch-summary.md`.
+<!-- TOREVA-FALLBACK-DISPATCH END -->
