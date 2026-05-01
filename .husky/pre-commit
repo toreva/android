@@ -1,0 +1,64 @@
+#!/usr/bin/env sh
+# =============================================================================
+# CANONICAL pre-commit — goblin/toreva fleet
+#
+# Source of truth: goblin_infra/husky-canonical/pre-commit
+# DO NOT EDIT IN-REPO. Re-run: goblin_infra/scripts/propagate-husky-hooks.sh --apply
+#
+# Scope: staged files only. Never scan the full repo (context budget rule —
+# see feedback_narrow_vs_broad_dispatch_pattern).
+#
+# Checks:
+#   1. Block secret-bearing files (secrets/state belong in managed stores)
+#   2. Block high-signal secret patterns in staged diff
+#   3. Call repo-local extension .husky/local/pre-commit.sh if present
+# =============================================================================
+set -e
+
+HUSKY_DIR="$(dirname "$0")"
+
+# --- 1. Block secret-bearing files (templates allowed) ------------------------
+if git diff --cached --name-only --diff-filter=ACMR \
+  | grep -E '(^|/)(\.env($|\.)|[^/]+\.tfvars(\.json)?$|[^/]+\.tfstate($|\.))' \
+  | grep -vE '\.(example|sample|template)$'; then
+  echo "✗ refusing to commit secret-bearing files"
+  echo "  .env*     -> move secrets to Secret Manager"
+  echo "  *.tfvars  -> commit only placeholder templates such as *.tfvars.example"
+  echo "  *.tfstate -> never commit Terraform state; use the configured backend"
+  exit 1
+fi
+
+# --- 2. Block high-signal secret patterns in staged content ------------------
+# NOTE: final grep uses -q so the matching line (containing the actual secret)
+# is NOT echoed back to the developer's terminal / scrollback / screen share.
+# Patterns (prefix → provider):
+#   AIza…             Google API
+#   (AKIA|ASIA|        AWS access key family: long-lived (AKIA), STS temporary
+#    AROA|ANPA|         (ASIA), role (AROA), managed-policy (ANPA), IAM user
+#    AIDA)              (AIDA)
+#   gh[psruo]_…       GitHub token (PAT / OAuth / user / server / refresh)
+#   github_pat_…      GitHub fine-grained personal access token
+#   sk_live_…         Stripe live key
+#   sk-…{48,255}      Anthropic (sk-ant-*) / OpenAI (sk-proj-*, legacy);
+#                     flanked by non-key chars + length-bounded so long base64
+#                     blobs / minified JS containing "sk-" don't false-positive
+#   xox[baprs]-…      Slack token
+#   xapp-…            Slack app-level token
+#   -----BEGIN…       PEM-encoded private key
+#   "private_key"     GCP service-account JSON
+if git diff --cached -U0 --diff-filter=ACMR \
+  | grep -E '^\+' \
+  | grep -vE '^\+\+\+' \
+  | grep -qE 'AIza[0-9A-Za-z_-]{35}|(AKIA|ASIA|AROA|ANPA|AIDA)[0-9A-Z]{16}|gh[psruo]_[A-Za-z0-9_]{36}|github_pat_[A-Za-z0-9_]{82}|sk_live_[0-9A-Za-z]{20,}|(^|[^A-Za-z0-9_-])sk-[A-Za-z0-9_-]{48,255}([^A-Za-z0-9_-]|$)|xox[baprs]-[0-9A-Za-z-]{10,}|xapp-[0-9A-Za-z-]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|"private_key"[[:space:]]*:[[:space:]]*"-----BEGIN'; then
+  echo "✗ staged diff contains what looks like an API key, service-account JSON, or private key"
+  echo "  (the matching line is intentionally NOT printed — check \`git diff --cached\` yourself)"
+  echo "  if a false positive, unstage and open an issue to refine the pattern"
+  exit 1
+fi
+
+# --- 3. Repo-local extension --------------------------------------------------
+# Repo-specific checks (lint, typecheck, unit tests on staged files, etc.)
+# live in .husky/local/pre-commit.sh and are preserved across re-propagation.
+if [ -x "$HUSKY_DIR/local/pre-commit.sh" ]; then
+  "$HUSKY_DIR/local/pre-commit.sh" || exit $?
+fi
