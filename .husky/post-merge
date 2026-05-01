@@ -1,0 +1,49 @@
+#!/usr/bin/env sh
+# =============================================================================
+# CANONICAL post-merge — goblin/toreva fleet
+#
+# Source of truth: goblin_infra/husky-canonical/post-merge
+# DO NOT EDIT IN-REPO. Re-run: goblin_infra/scripts/propagate-husky-hooks.sh --apply
+#
+# Fires after: git pull / git merge (local merges only — not GitHub-side).
+#
+# Behavior:
+#   - If the merge landed on main/master, print a deploy reminder.
+#   - If GOBLIN_HUSKY_POSTMERGE_TRIGGER_DEPLOY=1 is set AND `gh` CLI is
+#     available AND there is a deploy-prod.yml workflow, invoke it.
+#
+# Note: the canonical "main → deploy" path is GitHub Actions
+# `on: push: branches: [main]` in each repo's .github/workflows/deploy-*.yml.
+# This hook is local notification + opt-in manual trigger only.
+# =============================================================================
+set -e
+
+HUSKY_DIR="$(dirname "$0")"
+
+current_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')"
+
+case "$current_branch" in
+  main|master)
+    echo ""
+    echo "ℹ post-merge: local $current_branch updated."
+    echo "  → GitHub Actions will trigger deploy on push (if .github/workflows/deploy-*.yml configured)."
+
+    if [ "${GOBLIN_HUSKY_POSTMERGE_TRIGGER_DEPLOY:-}" = "1" ]; then
+      if command -v gh >/dev/null 2>&1; then
+        # Find any deploy-prod*.yml workflow and trigger it against main.
+        wf="$(ls .github/workflows/deploy-prod*.yml 2>/dev/null | head -1)"
+        if [ -n "$wf" ]; then
+          echo "  → GOBLIN_HUSKY_POSTMERGE_TRIGGER_DEPLOY=1 → running: gh workflow run $(basename "$wf")"
+          gh workflow run "$(basename "$wf")" --ref "$current_branch" || \
+            echo "  (gh workflow run failed — continue anyway)"
+        fi
+      fi
+    fi
+    echo ""
+    ;;
+esac
+
+# --- Repo-local extension -----------------------------------------------------
+if [ -x "$HUSKY_DIR/local/post-merge.sh" ]; then
+  "$HUSKY_DIR/local/post-merge.sh" || exit $?
+fi
