@@ -44,9 +44,9 @@ jobs:
           java-version: "17"
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: "8.8"
+          gradle-version: wrapper
       - name: Run Android lint
-        run: gradle --no-daemon lintDebug
+        run: ./gradlew --no-daemon lintDebug
 
   typecheck:
     name: ci/typecheck
@@ -59,9 +59,9 @@ jobs:
           java-version: "17"
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: "8.8"
+          gradle-version: wrapper
       - name: Compile Kotlin
-        run: gradle --no-daemon :app:compileDebugKotlin
+        run: ./gradlew --no-daemon :app:compileDebugKotlin
 
   unit:
     name: ci/unit
@@ -74,19 +74,21 @@ jobs:
           java-version: "17"
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: "8.8"
+          gradle-version: wrapper
       - name: Run unit tests
-        run: gradle --no-daemon testDebugUnitTest
+        run: ./gradlew --no-daemon testDebugUnitTest
 
   secrets:
     name: security/secrets
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Secret scan
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified
 
   build:
     name: ci/build
@@ -106,6 +108,6 @@ jobs:
           java-version: "17"
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: "8.8"
+          gradle-version: wrapper
       - name: Build debug APK
-        run: gradle --no-daemon assembleDebug
+        run: ./gradlew --no-daemon assembleDebug
