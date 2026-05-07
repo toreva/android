@@ -18,7 +18,7 @@ android {
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "TOREVA_API_URL", "\"${project.findProperty("TOREVA_API_URL") ?: "http://10.0.2.2:8080/"}\"")
+        buildConfigField("String", "TOREVA_API_URL", "\"${project.findProperty("TOREVA_API_URL") ?: "https://gateway.toreva.com/"}\"")
         buildConfigField("String", "SOLANA_CLUSTER", "\"${project.findProperty("TOREVA_SOLANA_CLUSTER") ?: "devnet"}\"")
         buildConfigField("String", "EXPLORER_URL", "\"${project.findProperty("TOREVA_EXPLORER_URL") ?: "https://solscan.io"}\"")
         buildConfigField("String", "RPC_URL", "\"${project.findProperty("TOREVA_RPC_URL") ?: "https://api.devnet.solana.com"}\"")
